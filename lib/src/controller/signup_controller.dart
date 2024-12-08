@@ -14,91 +14,80 @@ class SignUpController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> signUp() async {
-    try {
-      print("SignUp initiated");
-      print(
-          "Email: ${emailController.text}, Password: ${passwordController.text}");
+    print("Debug: SignUp process started.");
 
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+    // Debug: Menampilkan input pengguna
+    print("Debug: Email input: ${emailController.text}");
+    print("Debug: Password input: ${passwordController.text}");
+
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      print("Debug: Email or password is empty.");
+      Get.snackbar(
+        "Error",
+        "Email and password cannot be empty",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    try {
+      print("Debug: Attempting to create user...");
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      print("User created: ${userCredential.user}");
+      print("Debug: User created successfully.");
+      print("Debug: User UID: ${userCredential.user?.uid}");
+      print("Debug: User Email: ${userCredential.user?.email}");
+
       if (userCredential.user != null) {
+        print("Debug: Navigating to HomeScreen...");
         Get.off(() => HomeScreen());
+      } else {
+        print("Debug: UserCredential.user is null after creation.");
       }
     } catch (e) {
       print("Error during sign up: $e");
+
+      // Debug: Menampilkan error spesifik jika FirebaseAuthException
+      if (e is FirebaseAuthException) {
+        print("Debug: FirebaseAuthException occurred with code: ${e.code}");
+      }
+
       Get.snackbar(
         "Sign Up Failed",
         e.toString(),
         snackPosition: SnackPosition.BOTTOM,
       );
     }
+
+    print("Debug: SignUp process ended.");
   }
 
   Future<void> logIn() async {
-    try {
-      // Validasi input
-      if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-        Get.snackbar(
-          "Error",
-          "Email and password cannot be empty",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
-      }
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
 
-      // Logging untuk debugging
-      print("Logging in with Email: ${emailController.text}");
-
-      // Proses Log In menggunakan Firebase Authentication
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      // Validasi hasil Log In
-      if (userCredential.user != null) {
-        // Debugging: Log data user
-        print("Login successful: User UID: ${userCredential.user!.uid}");
-        print("User Email: ${userCredential.user!.email}");
-
-        // Navigasi ke HomeScreen
-        Get.off(() => HomeScreen());
-      } else {
-        throw Exception("Failed to retrieve user details after login.");
-      }
-    } catch (e) {
-      // Logging error untuk debugging
-      print("Login error: $e");
-
-      // Tangani error dengan pesan yang lebih spesifik
-      String errorMessage = "An unknown error occurred.";
-      if (e is FirebaseAuthException) {
-        print("test");
-        switch (e.code) {
-          case "user-not-found":
-            errorMessage = "No user found for this email.";
-            break;
-          case "wrong-password":
-            errorMessage = "Incorrect password provided.";
-            break;
-          case "invalid-email":
-            errorMessage = "The email address is badly formatted.";
-            break;
-          default:
-            errorMessage = e.message ?? errorMessage;
-        }
-      }
-
-      Get.snackbar(
-        "Login Failed",
-        errorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    if (userCredential.user != null) {
+      print("Debug: Login successful.");
+      print("Debug: User UID: ${userCredential.user?.uid}");
+      print("Debug: User Email: ${userCredential.user?.email}");
+      Get.off(() => HomeScreen());
+    } else {
+      throw Exception("Login failed: UserCredential.user is null.");
     }
+  } catch (e) {
+    print("Error during log in: $e");
+    Get.snackbar(
+      "Login Failed",
+      e.toString(),
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
+}
+
 }

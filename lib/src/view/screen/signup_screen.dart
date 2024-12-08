@@ -159,9 +159,9 @@ class SignUpScreen extends GetView<SignUpController> {
                       ? controller.signUp
                       : controller.logIn, // Sign Up atau Log In sesuai pilihan
                   child: Text(
-                    isSignUpSelected.value
-                        ? "Create an account"
-                        : "Log in",
+                    isSignUpSelected.value ? "Create an account" : "Log in",
+                    style: const TextStyle(
+                        color: Colors.white), // Warna teks diatur di sini
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
